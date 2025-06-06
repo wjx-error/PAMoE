@@ -11,6 +11,7 @@ The integration code for TransMIL and Transformer is also in `/models/models_dem
 <span style="color:red">**The complete code will be released soon.**</span>
 
 <img src="/figs/PAMOE.jpg"/>
+
 In this work, we introduce a plug-and-play **P**athology-**A**ware **M**ixture-**o**f-**E**xperts module (**PAMoE**), which identifies and processes tissue-specific features in the MoE layer, effectively tackling heterogeneous pathology tissues. PAMoE does not require specialized model workflow design and additional priors during inference, as it learns to route appropriate patches to its corresponding expert during training and discard patches that are irrelevant to the task.
 We integrated PAMoE into various established WSI analysis methods and conducted experiments on the survival prediction task. 
 The experimental results show that most transformer-based methods incorporated with PAMoE demonstrated performance improvements.
