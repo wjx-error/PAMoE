@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 from models.pamoe_layers.pamoe_utils import cal_prior_loss_ce, get_x_cos_similarity, FeedForwardNetwork
+import numpy
 
 class SwitchGate(nn.Module):
     """
