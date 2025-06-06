@@ -6,7 +6,7 @@
 **For now, we provide the implementation of PAMoE and demo implementations for integrating into [TransMIL](https://github.com/szc19990412/TransMIL) and vanilla Transformer.**
 
 The code implementation of the PAMoE plugin is located in `/models/pamoe_layers`.
-The integration code for TransMIL and Transformer is also in `/models/models_demo`.
+The integration code for TransMIL and Transformer is in `/models/models_demo`.
 
 <span style="color:red">**The complete code will be released soon.**</span>
 
