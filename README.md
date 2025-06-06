@@ -3,7 +3,7 @@
 
 **Due to the rush of graduation, we haven't had enough time to organize all the code yet.**
 
-**For now, we provide the implementation of PAMoE and demo implementations for integrating into [TransMIL](https://github.com/szc19990412/TransMIL) and Transformer.**
+**For now, we provide the implementation of PAMoE and demo implementations for integrating into [TransMIL](https://github.com/szc19990412/TransMIL) and vanilla Transformer.**
 
 The code implementation of the PAMoE plugin is located in `/models/pamoe_layers`.
 The integration code for TransMIL and Transformer is also in `/models/models_demo`.
@@ -19,7 +19,7 @@ The experimental results show that most transformer-based methods incorporated w
 ## Acknowledgement
 This work is supported by National Natural Science Foundation of China (Grant No. 82302316 and 62471133). This work is also supported by the Big Data Computing Center of Southeast University.
 The PAMoE implementation is based on: [flaxformer](https://github.com/google/flaxformer/blob/main/flaxformer/architectures/moe/routing.py#L647-L717),
-[swiss-ai](https://github.com/swiss-ai/MoE).
+[swiss-ai](https://github.com/swiss-ai/MoE), and [SwitchTransformers](https://github.com/kyegomez/SwitchTransformers).
 We would like to thank them for their contributions.
 
 ## Citing `PAMoE`
