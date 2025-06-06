@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from nystrom_attention import NystromAttention
-from models.pamoe_layers.pamoe_new import PAMoE
+from models.pamoe_layers.pamoe import PAMoE
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 
 

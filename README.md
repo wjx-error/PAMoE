@@ -4,6 +4,9 @@ This repository provides the Pytorch implementations for
 Due to the rush of graduation, we haven't had enough time to organize all the code yet. 
 For now, we provide the implementation of PAMoE and demo implementations for integrating into [TransMIL](https://github.com/szc19990412/TransMIL) and Transformer.
 
+The code implementation of the PAMoE plugin is located in `/models/pamoe_layers`.
+The integration code for TransMIL and Transformer is also in `/models/models_demo`.
+
 The PAMoE implementation is based on: [flaxformer](https://github.com/google/flaxformer/blob/main/flaxformer/architectures/moe/routing.py#L647-L717),
 [swiss-ai](https://github.com/swiss-ai/MoE).
 We would like to thank them for their contributions.
