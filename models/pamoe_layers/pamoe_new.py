@@ -42,8 +42,6 @@ class SwitchGate(nn.Module):
         """
 
         x_gated = self.w_gate(x)
-
-        # 得分按照专家dim  每个patch的所有专家加起来=1
         gate_scores = F.softmax(x_gated, dim=-1)  # scores dim=experts
 
         # topk=n*c/e
