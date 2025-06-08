@@ -2,9 +2,10 @@ import torch
 import torch.nn as nn
 import numpy as np
 from nystrom_attention import NystromAttention
-from models.pamoe_layers.pamoe import PAMoE
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 
+from models.pamoe_layers.pamoe import PAMoE
+# from models.pamoe_layers.pamoe_new import PAMoE
 
 class FeedForward(nn.Module):
     def __init__(self, dim, mult=4, dropout=0.):
@@ -67,8 +68,7 @@ class TransLayer(nn.Module):
             self.ffn = FeedForward(dim=dim, dropout=0.2)
 
     def forward(self, x):
-        x = self.norm1(x)
-        x = x + self.attn(x)
+        x = x + self.attn(self.norm1(x))
 
         x = self.norm2(x)
         if self.use_pamoe:
@@ -126,7 +126,7 @@ class transmil_pmoe(nn.Module):
         self.proto_types = torch.load(prototype_pth, map_location='cpu')
         self.num_experts_w_super = num_expert_proto
 
-    def forward(self, x, coords=None):
+    def forward(self, x, **kwargs):
 
         pamoe_loss_list = []
 
@@ -150,22 +150,13 @@ class transmil_pmoe(nn.Module):
         x2 = torch.cat([x2, x2[:, :add_length, :]], dim=1)
         similarity_scores = get_x_cos_similarity(x2, self.num_experts_w_super, self.proto_types)
 
-        print('similarity_scores', similarity_scores[0].shape, len(similarity_scores))
-
         # ---->Translayer x1
         h, gate_pamoe1 = self.layer1(h)  # [B, N, 512]
 
-        print('remove_zero_vectors')
         pamoe_loss, h, similarity_scores = drop_patch_cal_ce(h, similarity_scores, gate_pamoe1,
-                                                                    self.num_experts_w_super, use_cls_token=True,
-                                                                    drop_zeros=False)
+                                                             self.num_experts_w_super, use_cls_token=True,
+                                                             drop_zeros=False)
         pamoe_loss_list.append(pamoe_loss)
-        print(h.shape)
-        print(len(similarity_scores), similarity_scores[0].shape)
-
-        print('end\n')
-
-        print('gate_pamoe1', gate_pamoe1.shape)
 
         # ---->PPEG
         h = self.pos_layer(h, _H, _W)  # [B, N, 512]
@@ -174,7 +165,7 @@ class transmil_pmoe(nn.Module):
         h, gate_pamoe2 = self.layer2(h)  # [B, N, 512]
 
         pamoe_loss, h, similarity_scores = drop_patch_cal_ce(h, similarity_scores, gate_pamoe2,
-                                                                    self.num_experts_w_super, use_cls_token=True)
+                                                             self.num_experts_w_super, use_cls_token=True)
         pamoe_loss_list.append(pamoe_loss)
 
         # ---->cls_token

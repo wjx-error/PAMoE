@@ -1,12 +1,14 @@
+'''
+    ExpertChoiceMoE implementation based on https://github.com/kyegomez/SwitchTransformers
+    Drop patches in the batch
+'''
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 from models.pamoe_layers.pamoe_utils import cal_prior_loss_ce, get_x_cos_similarity, FeedForwardNetwork
 
-class SwitchGate(nn.Module):
+class ExpertChoiceGate(nn.Module):
     """
-    SwitchGate module for MoE (Mixture of Experts) model.
-
     Args:
         dim (int): Input dimension.
         num_experts (int): Number of experts.
@@ -25,10 +27,10 @@ class SwitchGate(nn.Module):
         self.dim = dim
         self.num_experts = num_experts
         self.capacity_factor = capacity_factor
-        self.w_gate = nn.Linear(dim, num_experts)
+        self.w_gate = nn.Linear(dim, num_experts, bias=False)
 
-        print('PAMoE num_experts', self.num_experts)
-        print('PAMoE capacity_factor', self.capacity_factor)
+        # print('PAMoE num_experts', self.num_experts)
+        # print('PAMoE capacity_factor', self.capacity_factor)
 
     def forward(self, x: Tensor):
         """
@@ -95,13 +97,12 @@ class PAMoE(nn.Module):
 
         self.experts = nn.ModuleList(
             [
-                # FeedForward(dim, dim, mult, *args, **kwargs)
                 self.build_ffn(dim, mult=ffn_mult, out_dim=out_dim, dropout=dropout)
                 for _ in range(num_experts)
             ]
         )
 
-        self.gate = SwitchGate(dim, num_experts, capacity_factor)
+        self.gate = ExpertChoiceGate(dim, num_experts, capacity_factor)
 
     def forward(self, x):
         # x (batch_size, seq_len, num_experts)
@@ -157,9 +158,14 @@ if __name__ == "__main__":
     num_experts_w_super = 4
     similarity_scores = get_x_cos_similarity(x, num_experts_w_super, prototypes)
 
-    my_moe = PAMoE(dim=1024, num_expert_extra=2, num_expert_proto=num_experts_w_super).cuda()
+    my_moe = PAMoE(dim=1024, num_expert_extra=2, num_expert_proto=num_experts_w_super, capacity_factor=1).cuda()
 
-    out, loss = my_moe(x)
-    loss_pamoe = cal_prior_loss_ce(similarity_scores, loss, num_experts_w_super)
+    out, x_gated = my_moe(x)
+    print(out.shape, x_gated.shape)
 
+    non_zero_mask = ~torch.all(out[0] == 0, dim=1)
+    non_zero_indices = torch.where(non_zero_mask)[0]
+    print(torch.sum(non_zero_mask))
+
+    loss_pamoe = cal_prior_loss_ce(similarity_scores, x_gated, num_experts_w_super)
     print(loss_pamoe)

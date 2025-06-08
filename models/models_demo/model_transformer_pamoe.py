@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
-from models.pamoe_layers.pamoe import PAMoE
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 
+# from models.pamoe_layers.pamoe import PAMoE
+from models.pamoe_layers.pamoe_new import PAMoE
 
 class TransformerEncoderBlock(nn.Module):
     def __init__(
@@ -59,13 +60,13 @@ class TransformerEncoderBlock(nn.Module):
                 )
         else:
             self.ffn = FeedForwardNetwork(
-                    embed_dim,
-                    embed_dim * ff_dim_mult,
-                    activation_fn='gelu',
-                    dropout=dropout,
-                    layernorm_eps=1e-5,
-                    subln=True,
-                )
+                embed_dim,
+                embed_dim * ff_dim_mult,
+                activation_fn='gelu',
+                dropout=dropout,
+                layernorm_eps=1e-5,
+                subln=True,
+            )
 
     def forward(self, x, src_mask=None, src_key_padding_mask=None):
         """
@@ -114,11 +115,13 @@ class TransformerEncoder(nn.Module):
             self,
             # common settings
             layer_type: list,
+            input_dim: int,
             embed_dim: int,
             num_heads: int = 8,
             ff_dim_mult: int = 4,
             dropout: float = 0.1,
             use_cls_token: bool = True,
+            n_classes: int = 1,
 
             # PAMoE settings
             capacity_factor=1.0,
@@ -155,6 +158,8 @@ class TransformerEncoder(nn.Module):
         if self.use_cls_token:
             self.cls_token = nn.Parameter(torch.randn(1, 1, embed_dim))
 
+        self._fc1 = nn.Linear(input_dim, embed_dim)
+
         layer_list = []
         for ltp in layer_type:
             if ltp.lower() == 'ffn':
@@ -188,13 +193,18 @@ class TransformerEncoder(nn.Module):
         self.layers = nn.ModuleList(layer_list)
         self.norm = nn.LayerNorm(embed_dim)
 
+        self._fc2 = nn.Linear(embed_dim, n_classes)
+
         self.proto_types = torch.load(prototype_pth, map_location='cpu')
         self.num_experts_w_super = num_expert_proto
 
-    def forward(self, x, src_mask=None, src_key_padding_mask=None):
+    def forward(self, x, src_mask=None, src_key_padding_mask=None, **kwargs):
+
         # prototype similarities
         x2 = x.clone().detach()
         similarity_scores = get_x_cos_similarity(x2, self.num_experts_w_super, self.proto_types)
+
+        x = self._fc1(x)
 
         if self.use_cls_token:
             B = x.shape[0]
@@ -220,6 +230,8 @@ class TransformerEncoder(nn.Module):
         else:
             x = torch.mean(self.norm(x), dim=1)
 
+        logits = self._fc2(x)  # [B, n_classes]
+
         # cal pamoe loss
         pamoe_loss_list = [p for p in pamoe_loss_list if p is not None]
         if pamoe_loss_list:
@@ -227,18 +239,21 @@ class TransformerEncoder(nn.Module):
         else:
             loss_pamoe = None
 
-        return x, loss_pamoe
+        return gate_scores_list, logits, loss_pamoe
 
 
 # sample
 if __name__ == "__main__":
     batch_size = 8
     seq_len = 500
-    embed_dim = 1024
+    input_dim = 1024
+    embed_dim = 512
     layer_type = ['pamoe', 'ffn', 'pamoe', 'ffn']
 
     encoder_block = TransformerEncoder(
+        n_classes=2,
         layer_type=layer_type,
+        input_dim=input_dim,
         embed_dim=embed_dim,
         num_heads=8,
         ff_dim_mult=4,
@@ -251,10 +266,10 @@ if __name__ == "__main__":
         pamoe_use_residual=True
     ).cuda()
 
-    x = torch.randn(batch_size, seq_len, embed_dim).cuda()
+    x = torch.randn(batch_size, seq_len, input_dim).cuda()
 
-    output, loss_pamoe = encoder_block(x)
+    gate_scores_list, logits, loss_pamoe = encoder_block(x)
 
     print(f"x: {x.shape}")
-    print(f"output: {output.shape}")
+    print(f"logits: {logits.shape}")
     print('loss_pamoe', loss_pamoe)
