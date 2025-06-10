@@ -65,8 +65,9 @@ python train.py
 
 ## Acknowledgement
 This work is supported by National Natural Science Foundation of China (Grant No. 82302316 and 62471133). This work is also supported by the Big Data Computing Center of Southeast University.
-The PAMoE implementation is based on: [SwitchTransformers](https://github.com/kyegomez/SwitchTransformers), 
+The PAMoE implementation is based on: 
 [swiss-ai](https://github.com/swiss-ai/MoE),
+[SwitchTransformers](https://github.com/kyegomez/SwitchTransformers),
 and [flaxformer](https://github.com/google/flaxformer/blob/main/flaxformer/architectures/moe/routing.py#L647-L717).
 We would like to thank them for their contributions.
 
