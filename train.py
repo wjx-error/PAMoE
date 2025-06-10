@@ -4,7 +4,6 @@ import argparse
 import torch
 import os
 from datasets_custom.make_datasets_utils import get_dataset_total, get_dataset_splits
-from torch.nn.utils.rnn import pad_sequence
 from timeit import default_timer as timer
 from utils.core_utils import train
 from utils.file_utils import save_pkl, load_pkl
