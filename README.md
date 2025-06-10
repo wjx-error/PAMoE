@@ -22,6 +22,7 @@ Specific application scheme should be considered in conjunction with practical s
 
 All PAMoE implementations are located in `/models/pamoe_layers`. 
 Below is a simplified sample of embedding PAMoE into TransformerEncoder and TransformerEncoderBlock. 
+
 The complete code can be found in `/models/models_demo/model_transformer_pamoe.py`. 
 
 ``` python
