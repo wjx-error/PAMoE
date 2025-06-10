@@ -1,7 +1,7 @@
 '''
     Another ExpertChoiceMoE implementation based on https://github.com/swiss-ai/MoE
     Calculate gate score in each batch
-    slower and low memory usage
+    slower but low memory usage
 '''
 import torch
 import torch.nn as nn
@@ -51,18 +51,15 @@ class PAMoE(nn.Module):
             # Extract current batch: [sequence_length, n_embd]
             batch_input = inputs[b]
 
-            # Compute routing logits for current batch: [sequence_length, num_experts]
+            # [sequence_length, num_experts]
             router_logits = self.router(batch_input)
             router_logits_all.append(router_logits)
 
-            # Compute routing weights and select top-k tokens for each expert within the batch
             if self.softmax_order == "softmax_topk":
-                # Apply softmax across experts first, then select top-k tokens
                 all_probs = F.softmax(router_logits, dim=-1, dtype=torch.float32)
                 # weights and selected_tokens shape: [num_experts, top_k]
                 weights, selected_tokens = torch.topk(all_probs.T, top_k)
             elif self.softmax_order == "topk_softmax":
-                # Select top-k tokens first, then apply softmax to the selected logits
                 weights, selected_tokens = torch.topk(router_logits.T, top_k)
                 weights = F.softmax(weights, dim=-1, dtype=torch.float32)
             else:
@@ -71,7 +68,6 @@ class PAMoE(nn.Module):
             # Process tokens through experts and aggregate results for current batch
             batch_result = torch.zeros_like(batch_input)
             for i, expert in enumerate(self.experts):
-                # Token indices selected by current expert: [top_k]
                 token_indices = selected_tokens[i]
                 # Get inputs for selected tokens: [top_k, n_embd]
                 expert_input = batch_input[token_indices]

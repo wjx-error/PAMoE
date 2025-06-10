@@ -1,0 +1,50 @@
+#### general settings and paths settings
+csv_path: ./dataset_csv/(project_name).csv # label csv path
+data_dir: path/to/data_root_dir/feature/(project_name)/h5_files
+
+split_dir: (project_name)_41_val_patient
+results_dir: ./checkpoints
+which_splits: 5foldcv
+
+### model settings
+model_type: transmil_pamoe
+
+input_dim: 1024
+capacity_factor: 2.0
+num_expert_proto: 4
+num_expert_extra: 2
+alpha_pamoe: 0.01
+proto_fold: ./prototypes
+
+### train settings
+gpu_ids: [0,1,2,3]
+num_workers: 4
+batch_size: 8
+in_memory: 0
+
+max_epochs: 100
+lr: 0.0002
+
+bar: 0
+testing: 0
+gc: 2
+early_stopping: True
+
+### loss and optimizer settings
+bag_loss: cox
+alpha_surv: 0
+
+opt: adamw #['adam', 'sgd', 'adamw']
+reg: 1e-02 # L2-regularization weight decay
+lambda_reg: 0.0001 #L1-Regularization Strength
+
+### k folds
+k: 5
+k_start: -1
+k_end: -1
+
+### other settings
+seed: 1
+log_data: True
+overwrite: False
+

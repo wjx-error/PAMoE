@@ -1,8 +1,8 @@
 '''
     Another ExpertChoiceMoE implementation based on https://github.com/swiss-ai/MoE
     Calculate gate score in each batch
-    full parallel version with einsum -- this can OOM quickly
-    faster and high memory usage
+    full parallel version with einsum
+    faster but high memory usage
 '''
 import torch
 import torch.nn as nn
@@ -14,11 +14,6 @@ class PAMoE(nn.Module):
     """
     This is the MoE implementation that uses the expert choice method from
     https://arxiv.org/pdf/2202.09368v2.pdf.
-
-    The main difference is that the router takes the softmax over the tokens, not the experts
-    (i.e. each expert chooses its top-k tokens, not the other way around).
-    For the same capacity factor, in theory, the same compute will be used as in standard top-k routing.
-    AFAICT, there is no way around the capacity factor (whereas the code above does not need it).
     """
 
     def __init__(self,
@@ -69,7 +64,6 @@ class PAMoE(nn.Module):
         else:
             raise ValueError(f"Unsupported softmax order: {self.softmax_order}")
 
-        """ Full parallel implementation with correct dimension alignment """
         # selection matrix P [b, e, top_k, t]
         P = torch.zeros(batch_size, self.n_experts, top_k, tokens_per_batch, device=inputs.device)
 
@@ -80,11 +74,9 @@ class PAMoE(nn.Module):
 
         # Set P to 1 at selected token positions for each batch and expert
         P[batch_idx, expert_idx, token_idx, selected_tokens] = 1.0
-
-        # Reshape P for matrix multiplication: [b*e, top_k, t]
+        # P_reshaped [b*e, top_k, t]
         P_reshaped = P.view(batch_size * self.n_experts, top_k, tokens_per_batch)
 
-        # Expand inputs to include expert dimension and flatten for parallel processing
         inputs_expanded = inputs.unsqueeze(1).repeat(1, self.n_experts, 1, 1)  # [b, e, t, d]
         inputs_flat = inputs_expanded.reshape(batch_size * self.n_experts, tokens_per_batch, embed_dim)  # [b*e, t, d]
 
@@ -99,10 +91,9 @@ class PAMoE(nn.Module):
             expert_input = x_in_reshaped[i * batch_size: (i + 1) * batch_size]
             experts_out.append(self.experts[i](expert_input))  # Apply expert network
 
-        # Stack expert outputs: [b, e, top_k, d]
+        # expert outputs: [b, e, top_k, d]
         experts_out = torch.stack(experts_out, dim=1)
 
-        # Combine results using einsum (preserve batch and token dimensions)
         # P: [b, e, top_k, t], weights: [b, e, top_k], experts_out: [b, e, top_k, d]
         results = torch.einsum("bejt,bej,bejd->btd", P, weights, experts_out)
 

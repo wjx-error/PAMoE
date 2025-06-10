@@ -1,7 +1,7 @@
 '''
     Sparse ExpertChoiceMoE implementation based on https://github.com/kyegomez/SwitchTransformers
     Calculate gate score in each batch
-    Redundant computations exist, lower and high memory usage
+    Redundant computations exist, slower and high memory usage
 '''
 import torch
 import torch.nn.functional as F
@@ -30,30 +30,14 @@ class ExpertChoiceGate(nn.Module):
         self.capacity_factor = capacity_factor
         self.w_gate = nn.Linear(dim, num_experts, bias=False)
 
-        # print('PAMoE num_experts', self.num_experts)
-        # print('PAMoE capacity_factor', self.capacity_factor)
-
     def forward(self, x: Tensor):
-        """
-        Forward pass of the SwitchGate module.
-
-        Args:
-            x (Tensor): Input tensor.
-
-        Returns:
-            Tensor: Gate scores.
-        """
+        batch_size, sequence_length, _ = x.shape
+        top_k = int(self.capacity_factor * sequence_length / self.num_experts)
+        top_k = max(1, top_k)
 
         x_gated = self.w_gate(x)
         gate_scores = F.softmax(x_gated, dim=-1)  # scores dim=experts
-
-        # topk=n*c/e
-        n = x.size(1)
-        c = self.capacity_factor  # 2
-        e = self.num_experts
-        top_num = int((n * c) // e)
-
-        top_k_scores, top_k_indices = x_gated.topk(top_num, dim=-2)
+        top_k_scores, top_k_indices = x_gated.topk(top_k, dim=-2)
 
         # Mask to enforce sparsity
         mask = torch.zeros_like(gate_scores).scatter_(

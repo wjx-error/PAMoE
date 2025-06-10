@@ -12,11 +12,6 @@ class PAMoE(nn.Module):
     """
     This is the MoE implementation that uses the expert choice method from
     https://arxiv.org/pdf/2202.09368v2.pdf.
-
-    The main difference is that the router takes the softmax over the tokens, not the experts
-    (i.e. each expert chooses its top-k tokens, not the other way around).
-    For the same capacity factor, in theory, the same compute will be used as in standard top-k routing.
-    AFAICT, there is no way around the capacity factor (whereas the code above does not need it).
     """
 
     def __init__(self,
