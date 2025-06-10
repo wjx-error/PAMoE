@@ -20,7 +20,7 @@ The WSIs can be found in [TCGA](https://www.cancer.gov/tcga).
 #### Patch Extraction
 We follow [CLAM](https://github.com/mahmoodlab/CLAM) to cut whole slide images (WSIs) into patches (size $256\times 256$ at $20\times$ magnification),
 and then generate the instance-level features using the [UNI](https://huggingface.co/MahmoodLab/UNI) encoder.
-In the subsequent steps, we follow CLAM's storage format to obtain the patch coordinates and features.
+In the subsequent steps, we follow CLAM's storage format (.h5 files) to obtain the patch coordinates and features.
 
 #### Patch Classification
 We obtain patch categories using the zero-shot classifier with [CONCH](https://github.com/mahmoodlab/CONCH).
