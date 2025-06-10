@@ -12,6 +12,104 @@ In this work, we introduce a plug-and-play **P**athology-**A**ware **M**ixture-*
 We integrated PAMoE into various established WSI analysis methods and conducted experiments on the survival prediction task. 
 The experimental results show that most transformer-based methods incorporated with PAMoE demonstrated performance improvements.
 
+## Quick Plug-and-Play
+PAMoE can be directly employed to replace the MLP layers within the models. 
+The `capacity_factor` parameter serves to regulate the proportion of tokens discarded by PAMoE.
+It is recommended that when setting capacity_factor to a relatively large value (e.g., 2), 
+multiple PAMoE layers can be stacked (e.g., used consecutively or intermittently across multiple Transformer blocks).
+Conversely, when capacity_factor is set to a smaller value (e.g., 1 or below), PAMoE is advised to be used as a standalone filter. 
+Specific application scheme should be considered in conjunction with practical scenarios.
+
+All PAMoE implementations are located in `/models/pamoe_layers`. 
+Below is a simplified sample of embedding PAMoE into TransformerEncoder and TransformerEncoderBlock. 
+The complete code can be found in `/models/models_demo/model_transformer_pamoe.py`. 
+
+``` python
+import torch
+import torch.nn as nn
+from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
+from models.pamoe_layers.pamoe import PAMoE
+
+class TransformerEncoderBlock(nn.Module):
+    def __init__(
+            # transformerblock settings
+            ...,
+            # PAMoE settings
+            use_pamoe=True, pamoe_use_residual=True, ...
+    ):
+    ...
+    self.pamoe_use_residual = pamoe_use_residual
+    if use_pamoe:
+        self.ffn = PAMoE(...)
+    else:
+        self.ffn = FeedForwardNetwork(...) # vanilla ffn setting
+    ...
+    
+    def forward(self, x, ...):
+        ...
+        x_res = x
+        x, gate_scores = self.ffn(x) # output x and gate scores os PAMoE
+        x_index = x.clone() # used for remove zero tokens
+        if self.pamoe_use_residual: # residual
+            x = x_res + x
+        ...
+        return x, gate_scores, x_index
+    
+class TransformerEncoder(nn.Module):
+    def __init__(
+            # transformer settings
+            layer_type=['pamoe', 'ffn', 'pamoe', 'ffn'], ...,
+            # PAMoE settings
+            drop_zeros=True, pamoe_use_residual=True, prototype_pth='./BRCA.pt', ...
+    ):
+        ...
+        layer_list = []
+        for tp in layer_type:
+            if tp.lower() == 'ffn':
+                layer_list.append(TransformerEncoderBlock(use_pamoe=False, ...))
+            elif tp.lower() == 'pamoe': # PAMoE layer
+                layer_list.append(TransformerEncoderBlock(use_pamoe=True, pamoe_use_residual=pamoe_use_residual, ...))
+        self.layers = nn.ModuleList(layer_list)
+        torch.load(prototype_pth, map_location='cpu') # load prototypes
+        ...
+        
+    def forward(self, x, ...):
+        similarity_scores = get_x_cos_similarity(x2, ..., self.proto_types) # extract prototype probabilities
+        ...
+        pamoe_loss_list = []
+        gate_scores_list = []
+        for layer in self.layers:  # transformer blocks
+            x, gate_scores_tmp, x_index = layer(x, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask)
+            pamoe_loss_tmp, x, similarity_scores = drop_patch_cal_ce(...,drop_zeros=self.drop_zeros,...) # calculate PAMoE loss and drop zeros
+            pamoe_loss_list.append(pamoe_loss_tmp)
+            gate_scores_list.append(gate_scores_tmp)
+        logits = self.head(x)
+        ...
+        loss_pamoe = torch.stack(pamoe_loss_list).mean()
+        return gate_scores_list, logits, loss_pamoe
+    
+```
+
+### Explanation of the `drop_zeros` and `pamoe_use_residual` Parameters
+In [Expert Choice MoE](https://arxiv.org/pdf/2202.09368v2), 
+certain tokens deemed less relevant during inference may not be routed to any expert. 
+Without explicit intervention, these tokens would be output as zero vectors.
+
+Given the ubiquity of residual connections in Transformer architectures, 
+our empirical studies demonstrate that directly incorporating these zero-valued residuals into the main pathway can lead to performance degradation. 
+This is attributed to the potential disruption of gradient flow and the accumulation of uninformative signals.
+
+Thus, we provide the `drop_zeros` and `pamoe_use_residual` Parameters.
+
+When the sorting relationship between tokens is meaningful, like [TransMIL](https://github.com/szc19990412/TransMIL),
+we suggest disabling both residual connections and zero-padding removal `drop_zeros=False, pamoe_use_residual=False`. 
+This preserves the original sequence structure while mitigating the adverse effects of zero residuals.
+
+When the sorting relationship is not important (e.g., in ViT, positional encoding has been used to mark the positions of tokens),
+we suggest enabling zero-token dropping and retaining residual connections `drop_zeros=True, pamoe_use_residual=True`. 
+
+The configuration `drop_zeros=False, pamoe_use_residual=True` represents the conventional approach of directly integrating all residuals, including zero vectors.
+
 ## Getting Start
 ### Data Preparation
 #### Download the WSIs
@@ -62,6 +160,7 @@ python train.py
 
 ## Acknowledgement
 This work is supported by National Natural Science Foundation of China (Grant No. 82302316 and 62471133). This work is also supported by the Big Data Computing Center of Southeast University.
+Our primary inspiration comes from [Expert Choice MoE](https://arxiv.org/pdf/2202.09368v2).
 The PAMoE implementation is based on: 
 [swiss-ai](https://github.com/swiss-ai/MoE),
 [SwitchTransformers](https://github.com/kyegomez/SwitchTransformers),
@@ -69,7 +168,6 @@ and [flaxformer](https://github.com/google/flaxformer/blob/main/flaxformer/archi
 We would like to thank them for their contributions.
 
 ## Citing `PAMoE`
-
 if you find `PAMoE` useful in your work, please cite our
 [paper](https://openaccess.thecvf.com/content/CVPR2025/papers/Wu_Learning_Heterogeneous_Tissues_with_Mixture_of_Experts_for_Gigapixel_Whole_CVPR_2025_paper.pdf):
 
