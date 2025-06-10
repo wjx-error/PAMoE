@@ -77,13 +77,13 @@ class TransLayer(nn.Module):
             class_token = x[:, 0:1, :]  # extract class token
             x = x[:, 1:, :]  # Exclude the class token
             class_token = self.cls_ffn(class_token)
-            x, loss_pamoe = self.ffn(x)
+            x, gate_pamoe = self.ffn(x)
             x = torch.cat([class_token, x], dim=1)
         else:
             x = x + self.ffn(x)
-            loss_pamoe = None
+            gate_pamoe = None
 
-        return x, loss_pamoe
+        return x, gate_pamoe
 
 
 class PPEG(nn.Module):
