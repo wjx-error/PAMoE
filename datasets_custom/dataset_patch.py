@@ -18,12 +18,12 @@ import h5py
 from datasets_custom.dataset_graph import Generic_Split_graph
 
 
-# 数据增强 node feature加噪+随机drop边
+# Data Augmentation
 def data_transform(x, coords):
     # 随机节点特征加噪
     n = len(x)
 
-    # 加噪
+    # noise
     rate = random.uniform(0.1, 0.2)
     rows_to_noise = np.random.choice(n, int(n * rate), replace=False)
     # rows_to_noise = rows_to_noise.astype(np.int32)
@@ -32,7 +32,7 @@ def data_transform(x, coords):
     noise = torch.randn_like(x[rows_to_noise]) * 0.1
     x[rows_to_noise] += noise
 
-    # 随机drop节点
+    # random drop
     max_drop_rate = 0.2
     min_drop_rate = 0.1
     rate = random.uniform(1 - max_drop_rate, 1 - min_drop_rate)
