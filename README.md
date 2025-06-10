@@ -80,7 +80,8 @@ class TransformerEncoder(nn.Module):
         gate_scores_list = []
         for layer in self.layers:  # transformer blocks
             x, gate_scores_tmp, x_index = layer(x, src_mask=src_mask, src_key_padding_mask=src_key_padding_mask)
-            pamoe_loss_tmp, x, similarity_scores = drop_patch_cal_ce(...,drop_zeros=self.drop_zeros,...) # calculate PAMoE loss and drop zeros
+            # calculate PAMoE loss and drop zeros
+            pamoe_loss_tmp, x, similarity_scores = drop_patch_cal_ce(...,drop_zeros=self.drop_zeros,...)
             pamoe_loss_list.append(pamoe_loss_tmp)
             gate_scores_list.append(gate_scores_tmp)
         logits = self.head(x)
