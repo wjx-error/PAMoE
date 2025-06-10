@@ -1,5 +1,6 @@
 # PAMoE
-> This repository provides the official implementation for CVPR 2025 paper ["Learning Heterogeneous Tissues with Mixture of Experts for Gigapixel Whole Slide Images"](https://openaccess.thecvf.com/content/CVPR2025/html/Wu_Learning_Heterogeneous_Tissues_with_Mixture_of_Experts_for_Gigapixel_Whole_CVPR_2025_paper.html).
+> This repository provides the official implementation for CVPR 2025 paper 
+> ["Learning Heterogeneous Tissues with Mixture of Experts for Gigapixel Whole Slide Images"](https://openaccess.thecvf.com/content/CVPR2025/html/Wu_Learning_Heterogeneous_Tissues_with_Mixture_of_Experts_for_Gigapixel_Whole_CVPR_2025_paper.html).
 
 We provide the implementation of PAMoE and demo implementations for integrating into [TransMIL](https://github.com/szc19990412/TransMIL) and vanilla Transformer.
 The code implementation of the PAMoE plugin is located in `/models/pamoe_layers`.
