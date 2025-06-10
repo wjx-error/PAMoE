@@ -32,7 +32,6 @@ subtype_dict = {
 
 
 def subtype_label(lb, project_nm):
-    # print(lb)
     list_label = list(subtype_dict.keys())
     assert project_nm in list_label
     label = 0
