@@ -198,8 +198,6 @@ class Generic_MIL_Survival_Dataset(Generic_WSI_Survival_Dataset):
         global args
         args = args_o
 
-        # print('self.slide_data',self.slide_data)
-
 
 class Generic_Split(Dataset):
     def __init__(self, slide_data, data_dir=None, label_col=None, transform=None,
