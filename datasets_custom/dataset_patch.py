@@ -72,8 +72,6 @@ class Generic_WSI_Survival_Dataset(Dataset):
         self.train_mode = train_mode
 
         print('csv_path', csv_path)
-
-        ## 带有label的pd
         try:
             slide_data = pd.read_csv(csv_path, index_col=0, low_memory=False, encoding='gbk')
         except:
