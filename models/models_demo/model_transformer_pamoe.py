@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 
-from models.pamoe_layers.pamoe_inbatch import PAMoE
-# from models.pamoe_layers.pamoe_inbatch1 import PAMoE
-# from models.pamoe_layers.pamoe_inbatch2 import PAMoE
+from models.pamoe_layers.pamoe import PAMoE
+# from models.pamoe_layers.pamoe1 import PAMoE
+# from models.pamoe_layers.pamoe2 import PAMoE
 # from models.pamoe_layers.pamoe_crossbatch import PAMoE
 
 class TransformerEncoderBlock(nn.Module):

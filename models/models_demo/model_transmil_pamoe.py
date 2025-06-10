@@ -4,9 +4,9 @@ import numpy as np
 from nystrom_attention import NystromAttention
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 
-from models.pamoe_layers.pamoe_inbatch import PAMoE
-# from models.pamoe_layers.pamoe_inbatch1 import PAMoE
-# from models.pamoe_layers.pamoe_inbatch2 import PAMoE
+from models.pamoe_layers.pamoe import PAMoE
+# from models.pamoe_layers.pamoe1 import PAMoE
+# from models.pamoe_layers.pamoe2 import PAMoE
 # from models.pamoe_layers.pamoe_crossbatch import PAMoE
 
 class FeedForward(nn.Module):
@@ -154,7 +154,6 @@ class transmil_pmoe(nn.Module):
 
         # ---->Translayer x1
         h, gate_pamoe1 = self.layer1(h)  # [B, N, 512]
-
         pamoe_loss, h, similarity_scores = drop_patch_cal_ce(h, similarity_scores, gate_pamoe1,
                                                              self.num_experts_w_super, use_cls_token=True,
                                                              drop_zeros=False)
@@ -165,7 +164,6 @@ class transmil_pmoe(nn.Module):
 
         # ---->Translayer x2
         h, gate_pamoe2 = self.layer2(h)  # [B, N, 512]
-
         pamoe_loss, h, similarity_scores = drop_patch_cal_ce(h, similarity_scores, gate_pamoe2,
                                                              self.num_experts_w_super, use_cls_token=True)
         pamoe_loss_list.append(pamoe_loss)
