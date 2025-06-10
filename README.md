@@ -22,12 +22,9 @@ We follow [CLAM](https://github.com/mahmoodlab/CLAM) to cut whole slide images (
 and then generate the instance-level features using the [UNI](https://huggingface.co/MahmoodLab/UNI) encoder.
 In the subsequent steps, we follow CLAM's storage format (.h5 files) to obtain the patch coordinates and features as model inputs.
 
-#### Patch Classification
-We obtain patch categories using the zero-shot classifier with [CONCH](https://github.com/mahmoodlab/CONCH).
-
-#### Prototype 
-After the patch extraction, 
-users can obtain patch types by first edit the args configurations in `/data_preparation/classfication_CONCH.py`,
+#### Patch Classification and Prototype Extraction
+After the patch extraction, we obtain patch categories using the zero-shot classifier with [CONCH](https://github.com/mahmoodlab/CONCH).
+Users can obtain patch types by first edit the args configurations in `/data_preparation/classfication_CONCH.py`,
 then run the following command
 ```
 python /data_preparation/classfication_CONCH.py
