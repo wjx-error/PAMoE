@@ -1,5 +1,3 @@
-# 分期任务是4分类
-
 def trans_labels(lb, args):
     if args.task == 'survival':
         return int(lb)
@@ -39,12 +37,7 @@ def subtype_label(lb, project_nm):
     assert project_nm in list_label
     label = 0
     for x in subtype_dict[project_nm]:
-        # if x in lb:
         if lb in x:
-
-            # print(x, 'lb', lb, label)
-            # print()
-
             return label
         label += 1
     return None
