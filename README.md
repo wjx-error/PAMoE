@@ -12,7 +12,7 @@ In this work, we introduce a plug-and-play **P**athology-**A**ware **M**ixture-*
 We integrated PAMoE into various established WSI analysis methods and conducted experiments on the survival prediction task. 
 The experimental results show that most transformer-based methods incorporated with PAMoE demonstrated performance improvements.
 
-## Getting Started
+## Getting Start
 ### Data Preparation
 #### Download the WSIs
 The WSIs can be found in [TCGA](https://www.cancer.gov/tcga).
