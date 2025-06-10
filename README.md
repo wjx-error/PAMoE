@@ -42,7 +42,7 @@ class TransformerEncoderBlock(nn.Module):
     if use_pamoe:
         self.ffn = PAMoE(...)
     else:
-        self.ffn = FeedForwardNetwork(...) # vanilla ffn setting
+        self.ffn = FeedForwardNetwork(...) # vanilla ffn
     ...
     
     def forward(self, x, ...):
