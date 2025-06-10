@@ -20,7 +20,6 @@ from datasets_custom.dataset_graph import Generic_Split_graph
 
 # Data Augmentation
 def data_transform(x, coords):
-    # 随机节点特征加噪
     n = len(x)
 
     # noise
