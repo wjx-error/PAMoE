@@ -38,7 +38,7 @@ then run the following command
 python /data_preparation/make_prototypes_classifier.py
 ```
 
-We provide precomputed prototypes in folder `/prototypes/`.
+We provide extracted prototypes in folder `/prototypes/`.
 We additionally provide a rapid prototype extraction choice based on clustering in `/data_preparation/make_prototypes_cluster.py`,
 the cluster based code is based on [PANTHER](https://github.com/mahmoodlab/PANTHER).
 
