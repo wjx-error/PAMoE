@@ -1,5 +1,5 @@
 '''
-    Another ExpertChoiceMoE implementation based on https://github.com/swiss-ai/MoE
+    The initial ExpertChoiceMoE implementation based on https://github.com/swiss-ai/MoE
     Calculate gate score across batches
 '''
 import torch
