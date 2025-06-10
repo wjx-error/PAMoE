@@ -1,18 +1,15 @@
 import torch.nn as nn
-
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
     from yaml import Loader, Dumper
-from collections import OrderedDict
 import torch
 from torch import Tensor
 import torch.nn.functional as F
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-# c 0 dead, 1 alive
+# c: 0 dead, 1 alive
 def nll_loss(hazards, S, Y, c, alpha=0.4, eps=1e-7):
     batch_size = len(Y)
     Y = Y.view(batch_size, 1)  # ground truth bin, 1,2,...,k
