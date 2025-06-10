@@ -24,7 +24,6 @@ class PairData(Data):
             return super(PairData, self).__inc__(key, value)
 
 
-# 数据增强 node feature加噪+随机drop边
 def data_transform(data):
     if data is None:
         return None
@@ -32,9 +31,9 @@ def data_transform(data):
     x = data.x
     edge = data.edge_index
 
-    # 随机节点特征加噪
     n = len(x)
 
+    # noise
     # rate = random.uniform(0.0, 0.2)
     rate = random.uniform(0.1, 0.3)
     # rate = 0.1
@@ -42,13 +41,14 @@ def data_transform(data):
     noise = torch.randn_like(x[rows_to_noise]) * 0.1
     x[rows_to_noise] += noise
 
+    # drop node
     # rate = random.uniform(0.0, 0.2)
     rate = random.uniform(0.1, 0.3)
     # rate = 0.2
     rows_to_drop = np.random.choice(n, int(n * rate), replace=False)
     x[rows_to_drop] = 0
 
-    # 随机丢弃边
+    # drop edge
     # rate = random.uniform(0.0, 0.2)
     rate = random.uniform(0.1, 0.3)
     # rate = 0.2
