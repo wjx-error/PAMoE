@@ -104,6 +104,7 @@ class TransformerEncoderBlock(nn.Module):
         # self.ffn = FeedForwardNetwork(...) # vanilla ffn
         self.ffn = PAMoE(...)
         self.proto_types = torch.load(prototype_pth, map_location='cpu') # load prototypes
+        
     def forward(self, x, ...):
         # extract prototype probabilities
         similarity_scores = get_x_cos_similarity(x, ..., self.proto_types)
