@@ -92,27 +92,6 @@ class TransformerEncoder(nn.Module):
         loss_pamoe = torch.stack(pamoe_loss_list).mean()
         return gate_scores_list, logits, loss_pamoe
 ```
-
-### Explanation of the Parameters `drop_zeros` and `pamoe_use_residual`
-In [Expert Choice MoE](https://arxiv.org/pdf/2202.09368v2), 
-certain tokens deemed less relevant during inference may not be routed to any expert. 
-Without explicit intervention, these tokens would be output as zero vectors.
-
-Given the ubiquity of residual connections in Transformer architectures, 
-our empirical studies demonstrate that directly incorporating these zero-valued residuals into the main pathway can lead to performance degradation.
-
-Thus, we provide the `drop_zeros` and `pamoe_use_residual` Parameters.
-
-When the sorting relationship between tokens is meaningful, like [TransMIL](https://github.com/szc19990412/TransMIL),
-we suggest disabling both residual connections and zero-padding removal `drop_zeros=False, pamoe_use_residual=False`. 
-This preserves the original sequence structure while mitigating the adverse effects of zero residuals.
-
-When the sorting relationship is not important (e.g., in ViT, positional encoding has been used to mark the positions of tokens),
-we suggest enabling zero-token dropping and retaining residual connections `drop_zeros=True, pamoe_use_residual=True`. 
-
-The configuration `drop_zeros=False, pamoe_use_residual=True` represents the conventional approach of directly integrating all residuals, including zero vectors.
-
-
 If you only want to simply replace the Feed-Forward Network (FFN) for experiments, 
 you can refer to the following implementation.
 ```python
@@ -135,10 +114,27 @@ class TransformerEncoderBlock(nn.Module):
         ...
         logits = self.head(x)
         return gate_scores, logits, pamoe_loss
-        
-        
-
 ```
+### Explanation of the Parameters `drop_zeros` and `pamoe_use_residual`
+In [Expert Choice MoE](https://arxiv.org/pdf/2202.09368v2), 
+certain tokens deemed less relevant during inference may not be routed to any expert. 
+Without explicit intervention, these tokens would be output as zero vectors.
+
+Given the ubiquity of residual connections in Transformer architectures, 
+our empirical studies demonstrate that directly incorporating these zero-valued residuals into the main pathway can lead to performance degradation.
+
+Thus, we provide the `drop_zeros` and `pamoe_use_residual` Parameters.
+
+When the sorting relationship between tokens is meaningful, like [TransMIL](https://github.com/szc19990412/TransMIL),
+we suggest disabling both residual connections and zero-padding removal `drop_zeros=False, pamoe_use_residual=False`. 
+This preserves the original sequence structure while mitigating the adverse effects of zero residuals.
+
+When the sorting relationship is not important (e.g., in ViT, positional encoding has been used to mark the positions of tokens),
+we suggest enabling zero-token dropping and retaining residual connections `drop_zeros=True, pamoe_use_residual=True`. 
+
+The configuration `drop_zeros=False, pamoe_use_residual=True` represents the conventional approach of directly integrating all residuals, including zero vectors.
+
+
 
 ## Getting Start
 ### Data Preparation
