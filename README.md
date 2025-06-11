@@ -99,8 +99,7 @@ certain tokens deemed less relevant during inference may not be routed to any ex
 Without explicit intervention, these tokens would be output as zero vectors.
 
 Given the ubiquity of residual connections in Transformer architectures, 
-our empirical studies demonstrate that directly incorporating these zero-valued residuals into the main pathway can lead to performance degradation. 
-This is attributed to the potential disruption of gradient flow and the accumulation of uninformative signals.
+our empirical studies demonstrate that directly incorporating these zero-valued residuals into the main pathway can lead to performance degradation.
 
 Thus, we provide the `drop_zeros` and `pamoe_use_residual` Parameters.
 
