@@ -135,7 +135,7 @@ we suggest enabling zero-token dropping and retaining residual connections `drop
 
 The configuration `drop_zeros=False, pamoe_use_residual=True` represents the conventional approach of directly integrating all residuals, including zero vectors.
 
-But for the simplest plug-and-play, 
+For the simplest plug-and-play, 
 the parameter `drop_zeros` should be retained and directly passed into the `drop_patch_cal_ce` method. 
 Whether to use residual connections should be controlled and implemented within the forward function by yourself.
 
