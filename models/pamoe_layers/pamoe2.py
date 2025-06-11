@@ -1,7 +1,7 @@
 '''
     Sparse ExpertChoiceMoE implementation based on https://github.com/kyegomez/SwitchTransformers
     Calculate gate score in each batch
-    Redundant computations exist, slower and high memory usage
+    Redundant computations exist, slower and high memory usage, but better performance in some cases.
 '''
 import torch
 import torch.nn.functional as F
