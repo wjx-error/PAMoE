@@ -99,6 +99,7 @@ import torch
 import torch.nn as nn
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 from models.pamoe_layers.pamoe import PAMoE
+
 class SampleModel(nn.Module):
     def __init__(self, drop_zeros=True, prototype_pth='./BRCA.pt', ...):
         # self.ffn = FeedForwardNetwork(...) # vanilla ffn
