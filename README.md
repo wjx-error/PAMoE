@@ -25,14 +25,14 @@ Below is a simplified sample of embedding PAMoE into TransformerEncoder and Tran
 
 The complete code can be found in `/models/models_demo/model_transformer_pamoe.py`. 
 
-``` python
+```python
 import torch
 import torch.nn as nn
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 from models.pamoe_layers.pamoe import PAMoE
 
 class TransformerEncoderBlock(nn.Module):
-    def __init__(
+    def __init__(self,
             # transformerblock settings
             ...,
             # PAMoE settings
@@ -57,7 +57,7 @@ class TransformerEncoderBlock(nn.Module):
         return x, gate_scores, x_index
     
 class TransformerEncoder(nn.Module):
-    def __init__(
+    def __init__(self,
             # transformer settings
             layer_type=['pamoe', 'ffn', 'pamoe', 'ffn'], ...,
             # PAMoE settings
@@ -71,7 +71,7 @@ class TransformerEncoder(nn.Module):
             elif tp.lower() == 'pamoe': # PAMoE layer
                 layer_list.append(TransformerEncoderBlock(use_pamoe=True, pamoe_use_residual=pamoe_use_residual, ...))
         self.layers = nn.ModuleList(layer_list)
-        torch.load(prototype_pth, map_location='cpu') # load prototypes
+        self.proto_types = torch.load(prototype_pth, map_location='cpu') # load prototypes
         ...
         
     def forward(self, x, ...):
@@ -88,12 +88,12 @@ class TransformerEncoder(nn.Module):
             gate_scores_list.append(gate_scores_tmp)
         logits = self.head(x)
         ...
+        # The PAMoE loss should be weighted added to the main loss for backpropagation.
         loss_pamoe = torch.stack(pamoe_loss_list).mean()
         return gate_scores_list, logits, loss_pamoe
-    
 ```
 
-### Explanation of the `drop_zeros` and `pamoe_use_residual` Parameters
+### Explanation of the Parameters `drop_zeros` and `pamoe_use_residual`
 In [Expert Choice MoE](https://arxiv.org/pdf/2202.09368v2), 
 certain tokens deemed less relevant during inference may not be routed to any expert. 
 Without explicit intervention, these tokens would be output as zero vectors.
@@ -111,6 +111,32 @@ When the sorting relationship is not important (e.g., in ViT, positional encodin
 we suggest enabling zero-token dropping and retaining residual connections `drop_zeros=True, pamoe_use_residual=True`. 
 
 The configuration `drop_zeros=False, pamoe_use_residual=True` represents the conventional approach of directly integrating all residuals, including zero vectors.
+
+如果只想简单地替代FFN进行实验，可以参考如下实现
+```python
+import torch
+import torch.nn as nn
+from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
+from models.pamoe_layers.pamoe import PAMoE
+class TransformerEncoderBlock(nn.Module):
+    def __init__(self, use_pamoe=True, drop_zeros=True, prototype_pth='./BRCA.pt', ...):
+        # self.ffn = FeedForwardNetwork(...) # vanilla ffn
+        self.ffn = PAMoE(...)
+        self.proto_types = torch.load(prototype_pth, map_location='cpu') # load prototypes
+    def forward(self, x, ...):
+        # extract prototype probabilities
+        similarity_scores = get_x_cos_similarity(x, ..., self.proto_types)
+        # PAMoE layer, and the residual connection can be optionally adopted here.
+        x, gate_scores = self.ffn(x)
+        # calculate PAMoE loss and drop zeros
+        pamoe_loss, x, similarity_scores = drop_patch_cal_ce(drop_zeros=self.drop_zeros,...)
+        ...
+        logits = self.head(x)
+        return gate_scores, logits, pamoe_loss
+        
+        
+
+```
 
 ## Getting Start
 ### Data Preparation
