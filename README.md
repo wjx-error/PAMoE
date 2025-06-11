@@ -112,7 +112,9 @@ we suggest enabling zero-token dropping and retaining residual connections `drop
 
 The configuration `drop_zeros=False, pamoe_use_residual=True` represents the conventional approach of directly integrating all residuals, including zero vectors.
 
-如果只想简单地替代FFN进行实验，可以参考如下实现
+
+If you only want to simply replace the Feed-Forward Network (FFN) for experiments, 
+you can refer to the following implementation.
 ```python
 import torch
 import torch.nn as nn
