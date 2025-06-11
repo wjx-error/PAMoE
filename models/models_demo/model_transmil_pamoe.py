@@ -9,20 +9,6 @@ from models.pamoe_layers.pamoe import PAMoE
 # from models.pamoe_layers.pamoe2 import PAMoE
 # from models.pamoe_layers.pamoe_crossbatch import PAMoE
 
-class FeedForward(nn.Module):
-    def __init__(self, dim, mult=4, dropout=0.):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(dim, dim * mult),
-            nn.GELU(),
-            nn.Dropout(dropout),
-            nn.Linear(dim * mult, dim)
-        )
-
-    def forward(self, x):
-        return self.net(x)
-
-
 class TransLayer(nn.Module):
     def __init__(self, norm_layer=nn.LayerNorm,
                  dim=512,
@@ -67,7 +53,14 @@ class TransLayer(nn.Module):
                 subln=True,
             )
         else:
-            self.ffn = FeedForward(dim=dim, dropout=0.2)
+            self.ffn = FeedForwardNetwork(
+                dim,
+                dim * 2,
+                activation_fn='gelu',
+                dropout=0.2,
+                layernorm_eps=1e-5,
+                subln=True,
+            )
 
     def forward(self, x):
         x = x + self.attn(self.norm1(x))
