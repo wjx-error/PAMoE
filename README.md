@@ -100,7 +100,7 @@ import torch.nn as nn
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
 from models.pamoe_layers.pamoe import PAMoE
 class TransformerEncoderBlock(nn.Module):
-    def __init__(self, use_pamoe=True, drop_zeros=True, prototype_pth='./BRCA.pt', ...):
+    def __init__(self, drop_zeros=True, prototype_pth='./BRCA.pt', ...):
         # self.ffn = FeedForwardNetwork(...) # vanilla ffn
         self.ffn = PAMoE(...)
         self.proto_types = torch.load(prototype_pth, map_location='cpu') # load prototypes
