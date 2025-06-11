@@ -25,7 +25,7 @@ Below is a simplified sample of embedding PAMoE into TransformerEncoder and Tran
 
 The complete code can be found in `/models/models_demo/model_transformer_pamoe.py`. 
 
-```python
+``` python
 import torch
 import torch.nn as nn
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
@@ -94,7 +94,7 @@ class TransformerEncoder(nn.Module):
 ```
 If you only want to simply replace the Feed-Forward Network (FFN) for experiments, 
 you can refer to the following implementation.
-```python
+``` python
 import torch
 import torch.nn as nn
 from models.pamoe_layers.pamoe_utils import drop_patch_cal_ce, get_x_cos_similarity, FeedForwardNetwork
