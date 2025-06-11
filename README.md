@@ -33,11 +33,11 @@ from models.pamoe_layers.pamoe import PAMoE
 
 class TransformerEncoderBlock(nn.Module):
     def __init__(self,
-            # transformerblock settings
-            ...,
-            # PAMoE settings
-            use_pamoe=True, pamoe_use_residual=True, ...
-    ):
+                 # transformerblock settings
+                 ...,
+                 # PAMoE settings
+                 use_pamoe=True, pamoe_use_residual=True, ...
+                 ):
     ...
     self.pamoe_use_residual = pamoe_use_residual
     if use_pamoe:
@@ -58,11 +58,11 @@ class TransformerEncoderBlock(nn.Module):
     
 class TransformerEncoder(nn.Module):
     def __init__(self,
-            # transformer settings
-            layer_type=['pamoe', 'ffn', 'pamoe', 'ffn'], ...,
-            # PAMoE settings
-            drop_zeros=True, pamoe_use_residual=True, prototype_pth='./BRCA.pt', ...
-    ):
+                 # transformer settings
+                 layer_type=['pamoe', 'ffn', 'pamoe', 'ffn'], ...,
+                 # PAMoE settings
+                 drop_zeros=True, pamoe_use_residual=True, prototype_pth='./BRCA.pt', ...
+                 ):
         ...
         layer_list = []
         for tp in layer_type:
