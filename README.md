@@ -76,7 +76,7 @@ class TransformerEncoder(nn.Module):
         
     def forward(self, x, ...):
         # extract prototype probabilities
-        similarity_scores = get_x_cos_similarity(x2, ..., self.proto_types)
+        similarity_scores = get_x_cos_similarity(x, ..., self.proto_types)
         ...
         pamoe_loss_list = []
         gate_scores_list = []
